@@ -82,7 +82,7 @@ class Snake():
 user = Snake(head=[BOARD_LENGTH/2, BOARD_LENGTH/2], snakeID='user')
 players.append(user)
 foods = []
-foods.append(Food(position=[30, 30]))
+foods.append(Food(position=[random.randint(0, BOARD_LENGTH), random.randint(0, BOARD_LENGTH)]))
 
 def update_gui(players):
     global moved
