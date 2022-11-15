@@ -1,11 +1,11 @@
-#Importing the packages
+# importing the packages
 import numpy as np
 import pygame
 import random
 import time
 
 #Setting dimensions
-PIXEL_LENGTH = 1000
+PIXEL_LENGTH = 850
 BOARD_LENGTH = 64
 scale_ratio = PIXEL_LENGTH/BOARD_LENGTH
 t = time.time()
@@ -73,16 +73,16 @@ class Snake():
         abs(self.head[1]-(BOARD_LENGTH/2)) > BOARD_LENGTH/2 or [0, 0] in self.tail[1:]:
             self.die()
         for i in foods:
-            if abs(self.head[0] - i.position[0]) < 3 and abs(self.head[1] - i.position[1]) < 3:
+            if abs(self.head[0] - i.position[0]) < 2 and abs(self.head[1] - i.position[1]) < 2:
                 self.grow = True
                 foods.remove(i)
-                foods.append(Food(position=[random.randint(0, BOARD_LENGTH), random.randint(0, BOARD_LENGTH)]))
+                foods.append(Food(position=[random.randint(1, BOARD_LENGTH-1), random.randint(1, BOARD_LENGTH-1)]))
 
 # Instantiate the Snake and Food objects
 user = Snake(head=[BOARD_LENGTH/2, BOARD_LENGTH/2], snakeID='user')
 players.append(user)
 foods = []
-foods.append(Food(position=[random.randint(0, BOARD_LENGTH), random.randint(0, BOARD_LENGTH)]))
+foods.append(Food(position=[random.randint(1, BOARD_LENGTH-1), random.randint(1, BOARD_LENGTH-1)]))
 
 def update_gui(players):
     global moved
@@ -98,11 +98,10 @@ def update_gui(players):
                 snake_cell.append((i[1]+player.head[1])*scale_ratio)
                 tail.insert(0, snake_cell)
         for i in tail:
-            pygame.draw.circle(scr, (255, 0, 0), i, scale_ratio)
+            pygame.draw.circle(scr, (30, 255, 50), i, scale_ratio*1.5)
     if len(foods) >= 1:
-        print(foods)
         for food in foods:
-            pygame.draw.circle(scr, (80, 80, 80), [i*scale_ratio for i in food.position], scale_ratio/2)
+            pygame.draw.circle(scr, (255, 0, 0), [i*scale_ratio for i in food.position], scale_ratio*.75)
     moved = False
 
 pygame.init()
@@ -113,15 +112,15 @@ while running:
         if event.type == pygame.QUIT:
             running = False
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_LEFT:
+            if event.key == pygame.K_LEFT and user.direction != 2:
                 user.change_direction(-2)
-            if event.key == pygame.K_DOWN:
+            if event.key == pygame.K_DOWN and user.direction != 1:
                  user.change_direction(-1)
-            if event.key == pygame.K_UP:
+            if event.key == pygame.K_UP and user.direction != -1:
                  user.change_direction(1)
-            if event.key == pygame.K_RIGHT:
+            if event.key == pygame.K_RIGHT and user.direction != -2:
                  user.change_direction(2)
-    if time.time()-t > 0.05:
+    if time.time()-t > 0.03:
         t = time.time()
         user.move()
         moved = True
