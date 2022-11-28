@@ -1,11 +1,12 @@
-# importing the packages
+# importing the modules
 import numpy as np
 import pygame
 import random
 import time
 
 # Setting dimensions of both the boards and pixels
-# Creating and setting time and player variables 
+# Setting time variable
+# Creating player and tail lists
 PIXEL_LENGTH = 850
 BOARD_LENGTH = 64
 scale_ratio = PIXEL_LENGTH/BOARD_LENGTH
@@ -49,6 +50,7 @@ class Snake():
 
     def grow(self):
         self.grow = True
+        pygame.display.set_caption(len(self.tail)
 
     def die(self):
         global running
@@ -83,9 +85,11 @@ class Snake():
             for i in self.tail:
                 i[0] -= 1
         self.tail.insert(0, [0, 0])
+        #Checks if the snake goes out of bounds 
         if abs(self.head[0]-(BOARD_LENGTH/2)) > BOARD_LENGTH/2 or \
         abs(self.head[1]-(BOARD_LENGTH/2)) > BOARD_LENGTH/2 or [0, 0] in self.tail[1:]:
             self.die()
+        # Checks if the snake is close to food
         for i in foods:
             if abs(self.head[0] - i.position[0]) < 2 and abs(self.head[1] - i.position[1]) < 2:
                 self.grow = True
@@ -113,6 +117,7 @@ def update_gui(players):
             tail = []
             for i in player.tail:
                 snake_cell = []
+                # Scaling the snake to the window size
                 snake_cell.append((i[0]+player.head[0])*scale_ratio)
                 snake_cell.append((i[1]+player.head[1])*scale_ratio)
                 tail.insert(0, snake_cell)
