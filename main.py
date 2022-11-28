@@ -6,7 +6,8 @@ import time
 
 visu = True
 
-#Setting dimensions
+#Setting dimensions of both the boards and pixels
+#Creating and setting time and player variables 
 PIXEL_LENGTH = 850
 BOARD_LENGTH = 64
 scale_ratio = PIXEL_LENGTH/BOARD_LENGTH
@@ -22,7 +23,11 @@ class Food():
     def respawn(self, board_length):
         self.position = [random.randint(1, board_length-1), random.randint(1, board_length-1)]
 
-# define snake object
+# Creating the Snake Class
+#__init__ function operates normally, assigning values to object properties
+#change_direction function outputs the value assigned to the parameter dir
+#grow function sets grow object property to true
+#
 class Snake():
     def __init__(self, snakeID, direction=0, head=[0, 0], tail=[[0, 0]], ):
         self.snakeID = snakeID
