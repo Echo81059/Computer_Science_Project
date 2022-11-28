@@ -1,4 +1,4 @@
-# importing the packages
+# Importing the packages
 import numpy as np
 import pygame
 import random
@@ -6,8 +6,8 @@ import time
 
 visu = True
 
-#Setting dimensions of both the boards and pixels
-#Creating and setting time and player variables 
+# Setting dimensions of both the boards and pixels
+# Creating and setting time and player variables 
 PIXEL_LENGTH = 850
 BOARD_LENGTH = 64
 scale_ratio = PIXEL_LENGTH/BOARD_LENGTH
@@ -15,7 +15,7 @@ t = time.time()
 players = []
 
 # Creating the Food Class
-#__init__ function operates normally, assgins values to postion and energy 
+# __init__ function operates normally, assgins values to postion and energy 
 #respawn function randomly "respawns" the food object in a random position of the board
 class Food():
     def __init__(self, position: list, energy=1):
@@ -26,10 +26,15 @@ class Food():
         self.position = [random.randint(1, board_length-1), random.randint(1, board_length-1)]
 
 # Creating the Snake Class
-#__init__ function operates normally, assigning values to object properties
-#change_direction function outputs the value assigned to the parameter dir
-#grow function sets grow object property to true
-#die functions sets 2 global variables. The rest of the code was in anticipation of possibly adding more to the game like enemy snakes, however does nothing in this version.
+# __init__ function operates normally, assigning values to object properties
+# change_direction function outputs the value assigned to the parameter dir
+# grow function sets grow object property to true
+# die function sets 2 global variables. The snakeID was in anticipation of possibly adding more to the game like enemy snakes, however does nothing in this version.
+# The rest of the code "kills" the snake
+# move function is where we create the base for the snakes movements
+# We assign numbers to the snakes direction and if facing that direction, the snake will "move" in this direction
+# We accomplish this by adding and removing values from the head and tail, which will eventually look like adding and removing shapes
+
 
 class Snake():
     def __init__(self, snakeID, direction=0, head=[0, 0], tail=[[0, 0]], ):
@@ -83,9 +88,12 @@ class Snake():
         if abs(self.head[0]-(BOARD_LENGTH/2)) > BOARD_LENGTH/2 or \
         abs(self.head[1]-(BOARD_LENGTH/2)) > BOARD_LENGTH/2 or [0, 0] in self.tail[1:]:
             self.die()     
-#Creating the Snake Environment class
-#__init__ function works like normal, now assigns specific values onto the player (creating its head) and the food (randomly placing it), anticipating to use both previously created classes
-#step function is basically stating that if the snake head and the food share a position, it sets the
+            
+# Creating the Snake Environment class
+# __init__ function works like normal, now assigns specific values onto the player (creating its head) and the food (randomly placing it), anticipating to use both previously created classes
+# Also takes in the board_length parameter 
+# step function is basically stating that if the snake head and the food share a position, it sets the player.grow function to true and uses the previously created respawn function to "respawn" the food
+# The rest of the step function essentially sets the "state" variable and returns it and the results of the reward function 
 class SnakeEnv():
     def __init__(self, board_length):
         self.board_length = board_length
@@ -100,9 +108,11 @@ class SnakeEnv():
         state = [self.food.position, self.player.direction, self.player.head, self.player.tail]
         return self.player.reward, state 
 
-# Instantiate the environment 
+# Instantiates the environment 
 env = SnakeEnv(BOARD_LENGTH)
 
+
+# Setting up the GUI visuals
 def update_gui(state):
     scr.fill((255, 255, 255))
     food_pos = state[0]
