@@ -14,7 +14,9 @@ scale_ratio = PIXEL_LENGTH/BOARD_LENGTH
 t = time.time()
 players = []
 
-# define food object
+# Creating the Food Class
+#__init__ function operates normally, assgins values to postion and energy 
+#respawn function randomly "respawns" the food object in a random position of the board
 class Food():
     def __init__(self, position: list, energy=1):
         self.position = position
@@ -27,7 +29,8 @@ class Food():
 #__init__ function operates normally, assigning values to object properties
 #change_direction function outputs the value assigned to the parameter dir
 #grow function sets grow object property to true
-#
+#die functions sets 2 global variables. The rest of the code was in anticipation of possibly adding more to the game like enemy snakes, however does nothing in this version.
+
 class Snake():
     def __init__(self, snakeID, direction=0, head=[0, 0], tail=[[0, 0]], ):
         self.snakeID = snakeID
@@ -80,7 +83,9 @@ class Snake():
         if abs(self.head[0]-(BOARD_LENGTH/2)) > BOARD_LENGTH/2 or \
         abs(self.head[1]-(BOARD_LENGTH/2)) > BOARD_LENGTH/2 or [0, 0] in self.tail[1:]:
             self.die()     
-
+#Creating the Snake Environment class
+#__init__ function works like normal, now assigns specific values onto the player (creating its head) and the food (randomly placing it), anticipating to use both previously created classes
+#step function is basically stating that if the snake head and the food share a position, it sets the
 class SnakeEnv():
     def __init__(self, board_length):
         self.board_length = board_length
