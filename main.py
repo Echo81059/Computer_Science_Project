@@ -1,10 +1,8 @@
-# Importing the packages
+# importing the packages
 import numpy as np
 import pygame
 import random
 import time
-
-visu = True
 
 # Setting dimensions of both the boards and pixels
 # Creating and setting time and player variables 
@@ -13,36 +11,36 @@ BOARD_LENGTH = 64
 scale_ratio = PIXEL_LENGTH/BOARD_LENGTH
 t = time.time()
 players = []
+tail = []
 
-# Creating the Food Class
-# __init__ function operates normally, assgins values to postion and energy 
-#respawn function randomly "respawns" the food object in a random position of the board
+# define food object
+# __init__ function operates normally, assgins values to postion and energy
 class Food():
     def __init__(self, position: list, energy=1):
         self.position = position
         self.energy = energy
-    
-    def respawn(self, board_length):
-        self.position = [random.randint(1, board_length-1), random.randint(1, board_length-1)]
 
 # Creating the Snake Class
 # __init__ function operates normally, assigning values to object properties
 # change_direction function outputs the value assigned to the parameter dir
 # grow function sets grow object property to true
-# die function sets 2 global variables. The snakeID was in anticipation of possibly adding more to the game like enemy snakes, however does nothing in this version.
-# The rest of the code "kills" the snake
+# die function sets 2 global variables.
+# Creates an if function that if the global running variable is false the snake "dies" and is removed
 # move function is where we create the base for the snakes movements
-# We assign numbers to the snakes direction and if facing that direction, the snake will "move" in this direction
+# We assign values to the snakes direction and if facing that direction, the snake will "move" in this direction
 # We accomplish this by adding and removing values from the head and tail, which will eventually look like adding and removing shapes
-
+# If the head reaches the end of the board area - the snkae die function is triggered
+# If the head and another part of the tail occupy the same area - the snake die function is triggered
+# If the head and food occupies the same area - the snake grow function is triggered, the food is removed, and then food position changes
 
 class Snake():
-    def __init__(self, snakeID, direction=0, head=[0, 0], tail=[[0, 0]], ):
+    def __init__(self, direction=0, head=[0, 0], tail=[[0, 0]], snakeID=0):
         self.snakeID = snakeID
+        if self.snakeID != 'user':
+            self.snakeID = len(players)
         self.direction = direction
         self.head = head
         self.tail = tail
-        self.reward = 0
         self.grow = False
 
     def change_direction(self, dir):
@@ -87,70 +85,71 @@ class Snake():
         self.tail.insert(0, [0, 0])
         if abs(self.head[0]-(BOARD_LENGTH/2)) > BOARD_LENGTH/2 or \
         abs(self.head[1]-(BOARD_LENGTH/2)) > BOARD_LENGTH/2 or [0, 0] in self.tail[1:]:
-            self.die()     
-            
-# Creating the Snake Environment class
-# __init__ function works like normal, now assigns specific values onto the player (creating its head) and the food (randomly placing it), anticipating to use both previously created classes
-# Also takes in the board_length parameter 
-# step function is basically stating that if the snake head and the food share a position, it sets the player.grow function to true and uses the previously created respawn function to "respawn" the food
-# The rest of the step function essentially sets the "state" variable and returns it and the results of the reward function 
-class SnakeEnv():
-    def __init__(self, board_length):
-        self.board_length = board_length
-        self.player = Snake(head=[board_length/2, board_length/2], snakeID='user')
-        self.food = Food(position=[random.randint(1, board_length-1), random.randint(1, board_length-1)])
+            self.die()
+        for i in foods:
+            if abs(self.head[0] - i.position[0]) < 2 and abs(self.head[1] - i.position[1]) < 2:
+                self.grow = True
+                foods.remove(i)
+                foods.append(Food(position=[random.randint(1, BOARD_LENGTH-1), random.randint(1, BOARD_LENGTH-1)]))
 
-    def step(self):
-        self.player.move()
-        if abs(self.player.head[0] - self.food.position[0]) < 2 and abs(self.player.head[1] - self.food.position[1]) < 2:
-            self.player.grow = True
-            self.food.respawn(self.board_length)
-        state = [self.food.position, self.player.direction, self.player.head, self.player.tail]
-        return self.player.reward, state 
+# Instantiate the Snake and Food objects
+user = Snake(head=[BOARD_LENGTH/2, BOARD_LENGTH/2], snakeID='user')
+players.append(user)
+foods = []
+foods.append(Food(position=[random.randint(1, BOARD_LENGTH-1), random.randint(1, BOARD_LENGTH-1)]))
 
-# Instantiates the environment 
-env = SnakeEnv(BOARD_LENGTH)
-
-
-# Setting up the GUI visuals
-def update_gui(state):
+# update_gui function
+def update_gui(players):
+    # Creates 2 global variables moved and tail
+    global moved
+    global tail
+    # Fills the screen
     scr.fill((255, 255, 255))
-    food_pos = state[0]
-    player_head = state[2]
-    player_tail = state[3]
-    pygame.draw.circle(scr, (255, 0, 0), [i*scale_ratio for i in player_head], scale_ratio)
-    scaled_tail = []
-    for i in player_tail:
-        snake_cell = []
-        snake_cell.append((i[0]+player_head[0])*scale_ratio)
-        snake_cell.append((i[1]+player_head[1])*scale_ratio)
-        scaled_tail.insert(0, snake_cell)
-    for i in scaled_tail:
-        pygame.draw.circle(scr, (30, 255, 50), i, scale_ratio*1.5)
-    pygame.draw.circle(scr, (255, 0, 0), [i*scale_ratio for i in food_pos], scale_ratio*.75)
+    # Creates the player head
+    for player in players:
+        pygame.draw.circle(scr, (255, 0, 0), [i*scale_ratio for i in player.head], scale_ratio)
+        # Adds more cells values to the snake
+        if moved:
+            tail = []
+            for i in player.tail:
+                snake_cell = []
+                snake_cell.append((i[0]+player.head[0])*scale_ratio)
+                snake_cell.append((i[1]+player.head[1])*scale_ratio)
+                tail.insert(0, snake_cell)
+        # Drawing the circles
+        for i in tail:
+            pygame.draw.circle(scr, (30, 255, 50), i, scale_ratio*1.5)
+    # Based on the length/number of the foods "eaten" 
+    if len(foods) >= 1:
+        for food in foods:
+            pygame.draw.circle(scr, (255, 0, 0), [i*scale_ratio for i in food.position], scale_ratio*.75)
+    moved = False
 
+# Instantiates the board
 pygame.init()
 scr = pygame.display.set_mode((PIXEL_LENGTH, PIXEL_LENGTH))
 running = True
-if visu:
-    while running:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_LEFT and env.player.direction != 2:
-                    env.player.change_direction(-2)
-                if event.key == pygame.K_DOWN and env.player.direction != 1:
-                    env.player.change_direction(-1)
-                if event.key == pygame.K_UP and env.player.direction != -1:
-                    env.player.change_direction(1)
-                if event.key == pygame.K_RIGHT and env.player.direction != -2:
-                    env.player.change_direction(2)
-        if time.time()-t > 0.03: # delay speed in between each step (in addition to ~0.016 sec delay inflicated by pygame.display.update method)
-            t = time.time()
-            reward, state = env.step()
-            update_gui(state)
-        pygame.display.update()
-    pygame.quit()
-else:
-    pass
+# Creating the controls based on the arrow keys - setting the directions with values
+# The while running basically means for these commands to go on the entire time when
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_LEFT and user.direction != 2:
+                user.change_direction(-2)
+            if event.key == pygame.K_DOWN and user.direction != 1:
+                 user.change_direction(-1)
+            if event.key == pygame.K_UP and user.direction != -1:
+                 user.change_direction(1)
+            if event.key == pygame.K_RIGHT and user.direction != -2:
+                 user.change_direction(2)
+    # Once the snake spawns in, it is stationary
+    # Allows the player to move once the game begins
+    if time.time()-t > 0.03:
+        t = time.time()
+        user.move()
+        moved = True
+    update_gui(players)
+    pygame.display.update()
+pygame.quit()
